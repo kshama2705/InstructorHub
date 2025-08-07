@@ -1,0 +1,59 @@
+{
+  "students_enrolled": {
+    "params": [],
+    "sql": "SELECT COUNT(*) AS value FROM students;"
+  },
+  "students_completed_module": {
+    "params": [
+      "module_id"
+    ],
+    "sql": "\n      SELECT COUNT(DISTINCT student_id) AS value\n      FROM student_module_completions\n      WHERE module_id = :module_id;\n    "
+  },
+  "students_completed_assessment": {
+    "params": [
+      "assessment_id"
+    ],
+    "sql": "\n      SELECT COUNT(DISTINCT student_id) AS value\n      FROM student_assessment_completions\n      WHERE assessment_id = :assessment_id;\n    "
+  },
+  "students_completed_assessment_but_not_other": {
+    "params": [
+      "assessment_x",
+      "assessment_y"
+    ],
+    "sql": "\n      SELECT COUNT(DISTINCT a.student_id) AS value\n      FROM student_assessment_completions a\n      LEFT JOIN student_assessment_completions b\n        ON a.student_id = b.student_id\n       AND b.assessment_id = :assessment_y\n      WHERE a.assessment_id = :assessment_x\n        AND b.student_id IS NULL;\n    "
+  },
+  "students_completed_course": {
+    "params": [],
+    "sql": "\n      WITH total_modules AS (SELECT COUNT(*) AS n FROM modules),\n      per_student AS (\n        SELECT student_id, COUNT(DISTINCT module_id) AS k\n        FROM student_module_completions\n        GROUP BY student_id\n      )\n      SELECT COUNT(*) AS value\n      FROM per_student, total_modules\n      WHERE per_student.k = total_modules.n;\n    "
+  },
+  "average_assessment_score": {
+    "params": [
+      "assessment_id"
+    ],
+    "sql": "\n      SELECT AVG(score) AS value\n      FROM student_assessment_completions\n      WHERE assessment_id = :assessment_id;\n    "
+  },
+  "student_average_score": {
+    "params": [
+      "student_id"
+    ],
+    "sql": "\n      SELECT AVG(score) AS value\n      FROM student_assessment_completions\n      WHERE student_id = :student_id;\n    "
+  },
+  "total_time_on_module": {
+    "params": [
+      "module_id"
+    ],
+    "sql": "\n      SELECT SUM(minutes_spent) AS value\n      FROM student_module_completions\n      WHERE module_id = :module_id;\n    "
+  },
+  "average_time_on_module_per_student": {
+    "params": [
+      "module_id"
+    ],
+    "sql": "\n      SELECT AVG(summed_time) AS value FROM (\n        SELECT student_id, SUM(minutes_spent) AS summed_time\n        FROM student_module_completions\n        WHERE module_id = :module_id\n        GROUP BY student_id\n      );\n    "
+  },
+  "average_module_rating": {
+    "params": [
+      "module_id"
+    ],
+    "sql": "\n      SELECT AVG(rating) AS value\n      FROM student_module_completions\n      WHERE module_id = :module_id AND rating IS NOT NULL;\n    "
+  }
+}
