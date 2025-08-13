@@ -1,0 +1,5 @@
+# Core HTTP client (used by llama_intent_parser.py and/or llama_client.py)
+requests>=2.31.0
+
+# OpenAI-compatible SDK (used by llama_client.py if your LLaMA endpoint speaks OpenAI API)
+openai>=1.30.0

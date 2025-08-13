@@ -1,8 +1,8 @@
 import argparse, json, sys
 from metric_registry import MetricRegistry
-from intent_parser import parse_question
 from executor import execute_metric
 from feedback import module_feedback, course_feedback
+from llama_intent_parser import parse_question_with_fallback
 
 def main():
     parser = argparse.ArgumentParser(description="Instructor metrics CLI (user data)")
@@ -11,11 +11,13 @@ def main():
 
     subparsers = parser.add_subparsers(dest='command')
 
-    # Existing metrics subparser
+    # Metrics Q&A
     msp = subparsers.add_parser('ask', help='Ask numeric metric questions')
     msp.add_argument('question', type=str, help='Natural language question for metrics')
+    # LLaMA is ON by default; you can force rules-only:
+    msp.add_argument("--rules-only", action="store_true", help="Disable LLaMA; use rules parser only")
 
-    # New feedback subparsers
+    # Feedback analysis
     fsp = subparsers.add_parser('feedback-module', help='Module-level feedback')
     fsp.add_argument('module_id', type=int, help='Module ID')
 
@@ -24,13 +26,24 @@ def main():
     args = parser.parse_args()
 
     if args.command == 'ask':
-        intent = parse_question(args.question)
+        registry = MetricRegistry(args.metrics)
+
+        if args.rules_only:
+            from intent_parser import parse_question as rules_parse
+            intent = rules_parse(args.question)
+        else:
+            intent = parse_question_with_fallback(args.question, registry, args.db)
+
         if not intent:
-            print("Could not understand the question with current rules. "
-                  "Try specifying IDs like 'module 2' or 'assessment 3'.", file=sys.stderr)
+            tip = (
+                "Could not understand the question.\n"
+                "Tips:\n"
+                "  • Try including IDs like 'module 2' or names like 'module Foundations of Education'\n"
+                "  • Use --rules-only to bypass LLaMA if your endpoint isn’t configured"
+            )
+            print(tip, file=sys.stderr)
             sys.exit(2)
 
-        registry = MetricRegistry(args.metrics)
         sql, params = registry.render(intent["metric"], intent["params"])
         value = execute_metric(args.db, sql, params)
         if value is None:
