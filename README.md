@@ -40,8 +40,6 @@ requirements.txt        # Python dependencies
 README.md               # This file
 ```
 
-The previous version of the README is preserved in spirit but expanded here with LLM details. fileciteturn2file1
-
 ---
 
 ## Setup
