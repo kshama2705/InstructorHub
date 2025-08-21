@@ -12,13 +12,13 @@ This repo is designed to be **reliable, correct, and auditable**. The LLM **neve
 
 ## Why this approach (reliability & correctness)
 
-- **Semantic metric registry (`metrics.json`)**: Every supported question resolves to a **canonical metric** backed by a **reviewed, parameterized SQL** template (no free-form text2sql). This makes the system predictable and auditable. fileciteturn2file0
+- **Semantic metric registry (`metrics.json`)**: Every supported question resolves to a **canonical metric** backed by a **reviewed, parameterized SQL** template (no free-form text2sql). This makes the system predictable and auditable. 
 - **LLaMA intent parser (default)**: LLaMA converts natural language into `{ "metric": <name>, "params": {...} }`. We then **validate** the metric name against the registry and **coerce**/resolve the parameters, including **name→ID mapping** using the DB (e.g., “Final Exam” → `assessment_id`).
 - **Rules-based fallback**: If the LLM returns invalid JSON, unknown metrics, or unmappable params, we fall back to a small **rules parser** so the CLI remains functional without an API.
 - **Parameterization only**: Queries run through **parameterized SQL** with a read-only DB connection; no DDL/DML; short timeouts recommended. This keeps correctness and security high.
 - **Simple, testable surface**: For each metric, unit tests can validate both the SQL and the parsing (LLM & rules) with paraphrases.
 
-The initial registry includes counts, averages, set-differences, and time aggregations covering the example questions from the brief. See `metrics.json`. fileciteturn2file0
+The initial registry includes counts, averages, set-differences, and time aggregations covering the example questions from the brief. See `metrics.json`. 
 
 ---
 
