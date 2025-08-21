@@ -211,4 +211,4 @@ python3 cli.py feedback-course
 
 ## Metrics registry (examples)
 
-We ship templates for the questions listed in the brief (counts, averages, time). See `metrics.json` for the full list and SQL. fileciteturn2file0
+We ship templates for the questions listed in the brief (counts, averages, time). See `metrics.json` for the full list and SQL. 
